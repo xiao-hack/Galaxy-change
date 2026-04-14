@@ -16,40 +16,11 @@
 <a href="https://github.com/outlaws-bai/Galaxy/wiki/FAQ">FAQ</a> | 
 <a href="https://github.com/outlaws-bai/Galaxy/issues">Issue</a>
 </p>
+**💡 说明 / Notice** 
 
-## 🔥 主要功能
-
-- **自动化解密流量**：写好自定义 hook 后，插件会自动化解密后续代理的流量。
-- **与安全工具联动**：支持与 sqlmap、xray 的联动，让你更高效地发现潜在的安全漏洞。
-- **支持Burp多模块**：适用于 Burp 的多个模块，如 Intruder、Proxy、Repeater 和 Scanner。
-
-## 🔒 适用场景
-
-- 渗透测试中发现网站的 HTTP 报文做了加密。
-- 加密逻辑较为复杂，如加密算法组合、自定义算法和动态密钥等。
-- 想要使用扫描器，支持其对明文请求扫描，扫描请求发出后获得明文响应。
-- 你可以逆向出网站的加解密逻辑（包括通过 hook 方式调用客户端代码），并具备一定的代码能力。
-- ...
-
-## 🎥 效果演示
-
-**自动解密**
-
-> 启动后代理的请求/响应自动解密，并且将解密后的请求转发到 Repeater 后发送，得到的是明文响应。
-
-![hook](https://raw.githubusercontent.com/outlaws-bai/picture/main/img/hook.gif)
-
-**联动sqlmap**
-
-> 右键将解密后的明文请求发送给 sqlmap，sqlmap就可以扫描明文请求，并得到解密后的响应。
-
-![linkage-sqlmap](https://raw.githubusercontent.com/outlaws-bai/picture/main/img/linkage-sqlmap.gif)
-
-**联动xray**
-
-> 右键将解密后的明文请求发送给 xray，xray就可以扫描明文请求，并得到解密后的响应。
-
-![linkage-xray](https://raw.githubusercontent.com/outlaws-bai/picture/main/img/linkage-xray.gif)
+> 本项目是基于 [outlaws-bai/Galaxy](https://github.com/outlaws-bai/Galaxy)的 Fork 版本。
+>
+> 本仓库主要包含了我个人的更新与定制化修改。如果你想获取源项目，请访问上述链接。
 
 ## 🚀 安装指引
 
