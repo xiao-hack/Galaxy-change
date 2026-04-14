@@ -1,81 +1,29 @@
-# Release History
+# 🚀 Update / 更新日志
 
-## Under release
+## 2026-04-14
 
-1. 右键加解密失败时改为抛出异常
+#### ✨ 增加
 
-## 2024-08-04 Release 2.2.9
+> **RSA 算法：原生支持多块（Multi-block）加解密**
+>
+> - **功能突破**：彻底解决了 `too much data for RSA block` 报错。插件现已能够自动处理超过 128 字节（1024位密钥）或 256 字节（2048位密钥）的超长 RSA 密文。
+> - **兼容性**：保留原有 API 签名，现有脚本无需修改即可直接获得分块加解密能力。
+>
+> **脚本引擎优化：跨语言参数透明化**
+>
+> - **类型自动转换**：将 `CryptoUtil` 中加解密接口的入参统一升级为 `Object` 类型。
+> - **解决 ProxyArray 报错**：通过内部 `toJavaBytes` 逻辑，使得 GraalJS (JavaScript) 或 Python 脚本可以直接传递字节数组，免去了手动处理复杂类型包装的繁琐，极大降低了脚本编写门槛。
+>
+> **自动补全增强**：优化了编辑器逻辑，输入 `CodeUtil.` 或 `CryptoUtil.` 后能更顺滑地触发方法提示。
 
-1. 更新hook脚本代码编辑器中查看内置函数的快捷键为Ctrl（command） + `
-2. httphook的右键增加响应的加解密Item，并且结果改为弹窗保证可以在所有报文编辑器中可以使用
-3. sm2、rsa增加transformation入参，以支持可选模式，并且向前兼容
-4. 内置加解密工具类增加tea、xtea、xxtea加解密函数
-5. 代码编辑器中部分函数增加更详细的提示
-6. 项目中引入HttpClient，保证有联动jsrpc、frida的能力
-7. 内置示例中增加动态密钥示例，与靶场中同名的页面对应
-8. 从该版本开始，提供两个jar包，差异为是否包含jython
+#### 🛡️ 修复 
 
-## 2024-07-29 Release 2.2.8
-
-1. 增加更多示例：des、3des、aes+rsa、sm2+sm4
-2. 编辑器中代码提示增加headers.has、headers.hasIgnoreCase、des加解密、3des加解密等可用函数
-3. 修复展示堆栈信息时，没有展示出message的问题
-4. 安装时增加JDK启动检查
-5. 修复选项为JS时，重新加载panel无法正确显示的问题
-
-## 2024-07-26 Release 2.2.7
-
-1. fix some bugs
-2. 完成py、js的部分示例
-
-## 2024-07-20 Release 2.2.6
-
-1. fix some bugs
-2. 代码编辑器增加提示/补全功能
-
-## 2024-07-17 Release 2.2.5
-
-1. Request/Response 增加getBody、getJson方法。@outlaws-bai
-2. 更新examples中的描述。@outlaws-bai
-3. 移除无用的grpc-services。@outlaws-bai
-4. 增加自定义日志Appender，将日志自动输出到Burp的logging。@outlaws-bai
-
-## 2024-07-17 Release 2.2.4
-
-1. 修复path正常化处理遇到根目录失效的bug。@outlaws-bai
-2. 修复js和py模板中的描述错误。@outlaws-bai
-
-## 2024-07-14 Release 2.2.3
-
-1. 修复已知BUG。@outlaws-bai
-2. Setting增加打开工作目录按钮。@outlaws-bai
-3. HTTP HOOK新增两个Test按钮。@outlaws-bai
-
-## 2024-07-14 Release 2.2.2
-
-1. fix bug。@outlaws-bai
-2. 修改示例中的描述。@outlaws-bai
-
-## 2024-07-14 Release 2.2.1
-
-1. 通过导入jython的方式解决http hook -python 无法使用的问题。@outlaws-bai
-
-## 2024-07-14 Release 2.2.0
-
-1. http hook功能中新增语言支持：js、python 。@outlaws-bai
-2. 修复已知bug 。@outlaws-bai
-
-## 2024-07-13 Release 2.1.0
-
-1. 通过java file实现http hook的方式下，修改对其的调用方式。并同步修改examples。@outlaws-bai
-2. 当更新版本时，会自动将原有工作路径rename，以避免版本与其下文件不相符合问题。@outlaws-bai
-3. 部分代码优化。@outlaws-bai
-
-## 2024-07-12 Release 2.0.0
-
-1. 表达式实现方式更改为使用nashorn执行JS代码完成。@outlaws-bai
-2. 增加HttpHook的UI界面。@outlaws-bai
-
-## 2024-07-08 Release 1.x
-
-废弃。
+> **系统稳定性：修复关键 NullPointerException (NPE)**
+>
+> - **响应包加密修复**：解决了在 Burp Proxy 模块中，由于响应包发往客户端阶段（`hook_response_to_client`）请求对象（Request）可能为空，从而导致的插件崩溃问题。
+> - **防御性编程**：在 `Request.of(HttpRequest)` 入口处增加了 Null 检查。即便 Burp 的请求上下文丢失，插件也会安全返回 `null` 而不是抛出 `toByteArray()` 错误，显著提升了在高并发或特殊流量下的鲁棒性。
+>
+> - **SM2 国密算法：格式自适应增强**
+>   - **Raw 格式强制修正**：针对 128 字节的原始坐标数据增加了强制判定逻辑。即便首字节巧合为 `0x04`，只要长度符合 128 字节，代码都会正确补齐前缀并解析，解决了 1/256 概率下的解密失败问题。
+>   - **多格式兼容**：支持 Raw (128B)、Standard (129B) 以及 ASN.1 (DER) 格式的自动识别与互转。
+>   - **坐标对齐**：修复了 `BigInteger` 转换时偶发的字节偏移问题，确保坐标始终严格对齐为 32 字节。

@@ -21,6 +21,8 @@
 > 本项目是基于 [outlaws-bai/Galaxy](https://github.com/outlaws-bai/Galaxy)的 Fork 版本。
 >
 > 本仓库主要包含了我个人的更新与定制化修改。如果你想获取源项目，请访问上述链接。
+>
+> 详细的修改记录请查看[CHANGELOG.md](https://github.com/xiao-hack/Galaxy-change/blob/main/CHANGELOG.md)
 
 ## 🚀 安装指引
 
