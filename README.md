@@ -31,7 +31,7 @@
 
 ---
 
-<center>下面为源项目文档</center>
+<p align="center">下面为源项目文档</p>
 
 ---
 
