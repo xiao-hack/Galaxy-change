@@ -44,4 +44,12 @@ public class CodeUtil {
     public static String urlDecode(String data) {
         return URLDecoder.decode(data, StandardCharsets.UTF_8);
     }
+
+    public static byte[] stringToBytes(String data) {
+        return data.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static String bytesToString(byte[] data) {
+        return new String(data, StandardCharsets.UTF_8);
+    }
 }

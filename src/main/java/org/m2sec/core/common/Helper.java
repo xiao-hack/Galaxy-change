@@ -121,16 +121,26 @@ public class Helper {
         // 获取xml中配置的 console appender
         ConsoleAppender<ILoggingEvent> consoleAppender = (ConsoleAppender<ILoggingEvent>) rootLogger.getAppender(
             "CONSOLE");
+        PatternLayoutEncoder encoder;
+        if (consoleAppender != null) {
+            encoder = (PatternLayoutEncoder) consoleAppender.getEncoder();
+        } else {
+            encoder = new PatternLayoutEncoder();
+            encoder.setContext(loggerContext);
+            encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%level] [%logger{}:%line] - %msg%n");
+            encoder.start();
+        }
+
         // 创建并设置 file appender
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setContext(loggerContext);
         fileAppender.setName("FILE");
         fileAppender.setFile(Constants.LOG_FILE_PATH);
-        fileAppender.setEncoder(consoleAppender.getEncoder());
+        fileAppender.setEncoder(encoder);
         fileAppender.start();
         rootLogger.addAppender(fileAppender);
         // 创建并设置自定义 appender，将日志发送到burp
-        BurpAppender burpAppender = new BurpAppender(api, (PatternLayoutEncoder) consoleAppender.getEncoder());
+        BurpAppender burpAppender = new BurpAppender(api, encoder);
         burpAppender.setContext(loggerContext);
         burpAppender.setName("BURP");
         burpAppender.start();

@@ -124,14 +124,18 @@ public class ByteUtil {
         return new String(ByteUtil.subBytes(data, startIndex + 1, endIndex));
     }
 
-    public static byte[] concatenateByteArrays(byte[] array1, byte[] array2) {
-        byte[] result = new byte[array1.length + array2.length];
+    public static byte[] concatenateByteArrays(byte[]... arrays) {
+        int totalLength = 0;
+        for (byte[] array : arrays) {
+            totalLength += array.length;
+        }
 
-        // 复制第一个数组到结果数组的前半部分
-        System.arraycopy(array1, 0, result, 0, array1.length);
-
-        // 复制第二个数组到结果数组的后半部分
-        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        byte[] result = new byte[totalLength];
+        int currentIndex = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, result, currentIndex, array.length);
+            currentIndex += array.length;
+        }
 
         return result;
     }

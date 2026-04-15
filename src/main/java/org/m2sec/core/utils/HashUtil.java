@@ -18,6 +18,7 @@ public class HashUtil {
     public static final String SHA_1 = "SHA1";
 
     public static final String MD_5 = "MD5";
+    public static final String SM_3 = "SM3";
 
     public static byte[] calc(String algorithm, byte[] data) {
         try {

@@ -74,6 +74,7 @@ public class Request {
 
 
     public static Request of(HttpRequest request) {
+        if (request == null) return null;
         return Request.of(request.toByteArray().getBytes(), request.httpService().secure(),
                 request.httpService().host(), request.httpService().port());
     }

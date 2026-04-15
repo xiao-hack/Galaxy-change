@@ -131,9 +131,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
     private void installAutoComplete() {
         CompletionProvider provider = createCompletionProvider();
         AutoCompletion ac = new AutoCompletion(provider);
-        if (CompatTools.isMac()) {
-            ac.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE, KeyEvent.META_DOWN_MASK));
-        } else {
+        if (!CompatTools.isMac()) {
             ac.setTriggerKey(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_QUOTE, KeyEvent.CTRL_DOWN_MASK));
         }
         ac.setShowDescWindow(true);
@@ -169,6 +167,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         codeTextArea.setCodeFoldingEnabled(true);
         codeTextArea.setTabsEmulated(true);
         codeTextArea.setHighlightCurrentLine(true);
+        codeTextArea.setLineWrap(true);
         if (Galaxy.isInBurp()) {
             if (api.userInterface().currentTheme().equals(Theme.DARK)) {
                 try {
@@ -231,58 +230,70 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
 
 
     private CompletionProvider createCompletionProvider() {
-        DefaultCompletionProvider provider = new DefaultCompletionProvider();
+        DefaultCompletionProvider provider = new DefaultCompletionProvider() {
+            @Override
+            public boolean isValidChar(char ch) {
+                return super.isValidChar(ch) || ch == '.';
+            }
+        };
+        provider.setAutoActivationRules(true, ".");
         // 关键操作提示
         // CodeUtil - base64
-        provider.addCompletion(new ShorthandCompletion(provider, "base64decode", "CodeUtil.b64decode(byte[] data)",
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.b64decode", "CodeUtil.b64decode(byte[] data)",
             "Base64 decode -> byte[]", SwingTools.renderLink("CodeUtil.b64decode(byte[] data)", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "base64encode", "CodeUtil.b64encode(String data)",
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.b64encode", "CodeUtil.b64encode(String data)",
             "Base64 encode -> byte[]", SwingTools.renderLink("CodeUtil.b64encode(String data)", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "base64encodeToString", "CodeUtil.b64encodeToString" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.b64encodeToString", "CodeUtil.b64encodeToString" +
             "(byte[] data)", "Base64 encode to string -> String", SwingTools.renderLink("Base64 encode to string -> " +
             "String", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil" +
             ".java")));
         // CodeUtil - hex
-        provider.addCompletion(new ShorthandCompletion(provider, "hexDecode", "CodeUtil.hexDecode(String data)", "Hex" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.hexDecode", "CodeUtil.hexDecode(String data)", "Hex" +
             " decode -> byte[]", SwingTools.renderLink("CodeUtil.hexDecode(String data)", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "hexEncode", "CodeUtil.hexEncode(byte[] data)", "Hex" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.hexEncode", "CodeUtil.hexEncode(byte[] data)", "Hex" +
             " encode -> byte[]", SwingTools.renderLink("CodeUtil.hexEncode(byte[] data)", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "hexEncodeToString", "CodeUtil.hexEncodeToString" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.hexEncodeToString", "CodeUtil.hexEncodeToString" +
             "(byte[] data)", "Hex encode to string -> String", SwingTools.renderLink("CodeUtil.hexEncodeToString" +
             "(byte[] data)", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils" +
             "/CodeUtil.java")));
         // CodeUtil - url
-        provider.addCompletion(new ShorthandCompletion(provider, "urlDecode", "CodeUtil.urlDecode(String data)", "Url" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.urlDecode", "CodeUtil.urlDecode(String data)", "Url" +
                 " decode -> String", SwingTools.renderLink("CodeUtil.urlDecode(String data)", "https://github" +
                 ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "urlEncode", "CodeUtil.urlEncode(String data)", "Url" +
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.urlEncode", "CodeUtil.urlEncode(String data)", "Url" +
                 " encode -> String", SwingTools.renderLink("CodeUtil.urlEncode(String data)", "https://github" +
                 ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.bytesToString", "CodeUtil.bytesToString(byte[] data)", "Bytes" +
+                " to string -> String", SwingTools.renderLink("CodeUtil.bytesToString(byte[] data)", "https://github" +
+                ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
+        provider.addCompletion(new ShorthandCompletion(provider, "CodeUtil.stringToBytes", "CodeUtil.stringToBytes(String data)", "String" +
+                " to bytes -> byte[]", SwingTools.renderLink("CodeUtil.stringToBytes(String data)", "https://github" +
+                ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/CodeUtil.java")));
         // JsonUtil
-        provider.addCompletion(new ShorthandCompletion(provider, "jsonStrToMap", "Map<?, ?> map = JsonUtil.jsonStrToMap(String " +
+        provider.addCompletion(new ShorthandCompletion(provider, "JsonUtil.jsonStrToMap", "Map<?, ?> map = JsonUtil.jsonStrToMap(String " +
             "jsonStr)", "json string to Map -> Map", SwingTools.renderLink("JsonUtil.jsonStrToMap(String jsonStr)",
             "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/JsonUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "jsonStrToList", "List<?> list = JsonUtil.jsonStrToList(String " +
+        provider.addCompletion(new ShorthandCompletion(provider, "JsonUtil.jsonStrToList", "List<?> list = JsonUtil.jsonStrToList(String " +
             "jsonStr)", "json string to List -> List", SwingTools.renderLink("JsonUtil.jsonStrToList(String jsonStr)"
             , "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/JsonUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "toJsonStr", "JsonUtil.toJsonStr(Object obj)",
+        provider.addCompletion(new ShorthandCompletion(provider, "JsonUtil.toJsonStr", "JsonUtil.toJsonStr(Object obj)",
             "Object to json string -> String", SwingTools.renderLink("JsonUtil.toJsonStr(Object obj)", "https" +
             "://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/JsonUtil.java")));
         // FactorUtil
-        provider.addCompletion(new ShorthandCompletion(provider, "randomString", "FactorUtil.randomString(int length)"
+        provider.addCompletion(new ShorthandCompletion(provider, "FactorUtil.randomString", "FactorUtil.randomString(int length)"
             , "Random string -> String", SwingTools.renderLink("FactorUtil.randomString(int length)", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/FactorUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "uuid", "FactorUtil.uuid()", "generate UUID -> " +
+        provider.addCompletion(new ShorthandCompletion(provider, "FactorUtil.uuid", "FactorUtil.uuid()", "generate UUID -> " +
             "String", SwingTools.renderLink("FactorUtil.uuid()", "https://github.com/outlaws-bai/Galaxy/blob/main/src" +
             "/main/java/org/m2sec/core/utils/FactorUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "currentDate", "FactorUtil.currentDate()", "Get " +
+        provider.addCompletion(new ShorthandCompletion(provider, "FactorUtil.currentDate", "FactorUtil.currentDate()", "Get " +
             "Current Date(yyyy-MM-dd HH:mm:ss) -> String", SwingTools.renderLink("FactorUtil.currentDate()", "https" +
             "://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/FactorUtil.java")));
-        provider.addCompletion(new ShorthandCompletion(provider, "currentTime", "FactorUtil.currentTime()", "Get " +
+        provider.addCompletion(new ShorthandCompletion(provider, "FactorUtil.currentTime", "FactorUtil.currentTime()", "Get " +
             "Current Time Stamp -> Long", SwingTools.renderLink("FactorUtil.currentTime()", "https://github" +
             ".com/outlaws-bai/Galaxy/blob/main/src/main/java/org/m2sec/core/utils/FactorUtil.java")));
 
@@ -423,7 +434,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // HashUtil
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "hash",
+            "HashUtil.calc",
             "HashUtil.calc(String algorithm, byte[] data)",
             "Hash calc -> byte[]",
             SwingTools.renderSummary("hash calc", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org" +
@@ -432,7 +443,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "hash",
+            "HashUtil.calcToHex",
             "HashUtil.calcToHex(String algorithm, byte[] data)",
             "Hash calcToHex -> String",
             SwingTools.renderSummary("hash calcToHex", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main" +
@@ -442,7 +453,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "hash",
+            "HashUtil.calcToBase64",
             "HashUtil.calcToBase64(String algorithm, byte[] data)",
             "Hash calcToBase64 -> String",
             SwingTools.renderSummary("hash calcToBase64", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main" +
@@ -453,7 +464,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // MacUtil
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "mac",
+            "MacUtil.calc",
             "MacUtil.calc(String algorithm, byte[] data, byte[] secret)",
             "Mac calc -> byte[]",
             SwingTools.renderSummary("mac calc", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org" +
@@ -462,7 +473,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "mac",
+            "MacUtil.calcToHex",
             "MacUtil.calcToHex(String algorithm, byte[] data, byte[] secret)",
             "Mac calcToHex -> String",
             SwingTools.renderSummary("mac calcToHex", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -472,7 +483,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "mac",
+            "MacUtil.calcToBase64",
             "MacUtil.calcToBase64(String algorithm, byte[] data, byte[] secret)",
             "Mac calcToBase64 -> String",
             SwingTools.renderSummary("mac calcToBase64", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main" +
@@ -483,15 +494,15 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // SignUtil
         provider.addCompletion(new ShorthandCompletion(
                 provider,
-                "sign",
-                "SignUtil.calc(String algorithm, byte[] data, byte[] privateKey)",
+                "SignUtil.sign",
+                "SignUtil.sign(String algorithm, byte[] data, byte[] privateKey)",
                 "Sign generate -> byte[]",
                 SwingTools.renderSummary("sign generate", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org" +
                         "/m2sec/core/utils/SignUtil.java", "byte[]", "algorithm(String) SHA256withRSA", "data(byte[]) origin data", "secret(byte[]) privateKey")
         ));
         provider.addCompletion(new ShorthandCompletion(
                 provider,
-                "sign",
+                "SignUtil.signToHex",
                 "SignUtil.signToHex(String algorithm, byte[] data, byte[] privateKey)",
                 "Sign generate -> String",
                 SwingTools.renderSummary("sign generate", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org" +
@@ -499,7 +510,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
                 provider,
-                "sign",
+                "SignUtil.signToBase64",
                 "SignUtil.signToBase64(String algorithm, byte[] data, byte[] privateKey)",
                 "Sign generate -> String",
                 SwingTools.renderSummary("sign generate", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java/org" +
@@ -508,7 +519,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto TEA
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "teaEncrypt",
+            "CryptoUtil.teaEncrypt",
             "CryptoUtil.teaEncrypt(String transformation, byte[] data, byte[] secret)",
             "TEA encrypt -> byte[]",
             SwingTools.renderSummary("DES encrypt",
@@ -521,7 +532,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion
             (provider,
-                "teaDecrypt",
+                "CryptoUtil.teaDecrypt",
                 "CryptoUtil.teaDecrypt(String transformation, byte[] data, byte[] secret)",
                 "TEA decrypt -> byte[]",
                 SwingTools.renderSummary("DES decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main" +
@@ -533,7 +544,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto - AES
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "aesEncrypt",
+            "CryptoUtil.aesEncrypt",
             "CryptoUtil.aesEncrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "AES encrypt -> byte[]",
             SwingTools.renderSummary("AES encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -544,7 +555,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "aesDecrypt",
+            "CryptoUtil.aesDecrypt",
             "CryptoUtil.aesDecrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "AES decrypt -> byte[]",
             SwingTools.renderSummary("AES decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -555,7 +566,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto DES
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "desEncrypt",
+            "CryptoUtil.desEncrypt",
             "CryptoUtil.desEncrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "DES encrypt -> byte[]",
             SwingTools.renderSummary("DES encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -565,7 +576,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
                 "params(Map<String, Object>) encrypt params")
         ));
         provider.addCompletion(new ShorthandCompletion(provider,
-            "desDecrypt",
+            "CryptoUtil.desDecrypt",
             "CryptoUtil.desDecrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "DES decrypt -> byte[]",
             SwingTools.renderSummary("DES decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -577,7 +588,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto 3DES
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "des3Encrypt",
+            "CryptoUtil.des3Encrypt",
             "CryptoUtil.des3Encrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "DES3 encrypt -> byte[]",
             SwingTools.renderSummary("DES3 encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -589,7 +600,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "des3Decrypt",
+            "CryptoUtil.des3Decrypt",
             "CryptoUtil.des3Decrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "DES3 decrypt -> byte[]",
             SwingTools.renderSummary("DES3 decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -600,7 +611,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto - SM4
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "sm4Encrypt",
+            "CryptoUtil.sm4Encrypt",
             "CryptoUtil.sm4Encrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "SM4 encrypt -> byte[]",
             SwingTools.renderSummary("SM4 encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -611,7 +622,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "sm4Decrypt",
+            "CryptoUtil.sm4Decrypt",
             "CryptoUtil.sm4Decrypt(String transformation, byte[] data, byte[] secret, Map<String, Object> params)",
             "SM4 decrypt -> byte[]",
             SwingTools.renderSummary("SM4 decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -623,7 +634,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto - RSA
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "rsaEncrypt",
+            "CryptoUtil.rsaEncrypt",
             "CryptoUtil.rsaEncrypt(String transformation, byte[] data, byte[] publicKey)",
             "RSA encrypt -> byte[]",
             SwingTools.renderSummary("RSA encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -633,7 +644,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "rsaDecrypt",
+            "CryptoUtil.rsaDecrypt",
             "CryptoUtil.rsaDecrypt(String transformation, byte[] data, byte[] privateKey)",
             "RSA decrypt -> byte[]",
             SwingTools.renderSummary("RSA decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -644,7 +655,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         // Crypto - SM2
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "sm2Encrypt",
+            "CryptoUtil.sm2Encrypt",
             "CryptoUtil.sm2Encrypt(String mode, byte[] data, byte[] publicKey)",
             "SM2 encrypt -> byte[]",
             SwingTools.renderSummary("SM2 encrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
@@ -653,7 +664,7 @@ public class CodeFileHookerPanel extends IHookerPanel<IHttpHooker> {
         ));
         provider.addCompletion(new ShorthandCompletion(
             provider,
-            "sm2Decrypt",
+            "CryptoUtil.sm2Decrypt",
             "CryptoUtil.sm2Decrypt(String mode, byte[] data, byte[] privateKey)",
             "SM2 decrypt -> byte[]",
             SwingTools.renderSummary("SM2 decrypt", "https://github.com/outlaws-bai/Galaxy/blob/main/src/main/java" +
