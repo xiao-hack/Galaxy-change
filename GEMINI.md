@@ -1,23 +1,28 @@
 # Galaxy Project Context
 
 ## Project Overview
-**Galaxy** is a powerful Burp Suite extension designed to simplify testing encrypted HTTP traffic. It allows security researchers to decrypt and encrypt traffic on-the-fly using custom scripts, making encrypted data appear as plaintext within Burp's standard tools (Proxy, Repeater, Intruder, etc.).
+**Galaxy** is a Burp Suite extension designed to facilitate the testing of encrypted HTTP traffic by providing on-the-fly decryption and encryption. It allows security researchers to view and modify encrypted data as plaintext within Burp's standard tools (Proxy, Repeater, Intruder, etc.) using custom-written hooks.
 
 ### Key Technologies
-- **Language**: Java 17+ (Targeting compatibility with Java 17/21).
+- **Language**: Java 17+ (Targeting Java 17/21 compatibility).
 - **Build System**: Gradle.
-- **Hooking Engines**: 
+- **Hooking Engines**:
     - **JavaScript**: Powered by GraalJS.
-    - **Python**: Supports both GraalPy and Jython.
-    - **Java**: Supports compiling and loading Java files as hooks.
-- **UI Framework**: Java Swing (integrated with Burp's Montoya API).
-- **Key Libraries**: Montoya API, RSyntaxTextArea (for code editing), Bouncy Castle (for crypto), Lombok.
+    - **Python**: Supports both GraalPy (via GraalVM) and Jython.
+    - **Java**: Supports compiling and loading `.java` files as hooks.
+- **UI Framework**: Java Swing with RSyntaxTextArea for script editing.
+- **Key Libraries**: Montoya API, Bouncy Castle (for crypto), Lombok, GraalVM SDK, SnakeYAML.
 
-### Architecture
-- `org.m2sec.abilities`: Core Burp functionalities like HTTP handlers, context menus, and payload generators.
-- `org.m2sec.core.httphook`: The orchestration layer for different script engines (JS, Python, Java).
-- `org.m2sec.core.utils`: Comprehensive utility classes for encoding (`CodeUtil`), crypto (`CryptoUtil`), hashing (`HashUtil`), and JSON processing (`JsonUtil`).
-- `org.m2sec.panels`: Swing-based GUI components for the plugin's configuration tabs.
+### Core Architecture
+- `org.m2sec.abilities`: Contains the primary logic for intercepting Burp traffic (`HttpHookHandler`) and providing context menus (`MasterContextMenuProvider`).
+- `org.m2sec.core.httphook`: Manages the different script engines (JS, Python, Java) and orchestrates the hooking lifecycle.
+- `org.m2sec.core.models`: Provides high-level abstractions for `Request` and `Response` objects, making them easier to manipulate within scripts compared to raw Montoya API objects.
+- `org.m2sec.core.utils`: A comprehensive suite of static utility classes:
+    - `CryptoUtil`: Symmetric (AES, DES, SM4) and Asymmetric (RSA, SM2) encryption.
+    - `CodeUtil`: Encoding/decoding (Base64, Hex, URL).
+    - `HashUtil`: Hashing (MD5, SHA, SM3).
+    - `JsonUtil`: JSON parsing and serialization using Gson.
+- `org.m2sec.panels`: Implements the Swing-based GUI for plugin configuration and script management.
 
 ## Building and Running
 
@@ -26,11 +31,11 @@ To generate the plugin JAR (Fat JAR containing all dependencies):
 ```bash
 ./gradlew shadowJar
 ```
-The output will be located in `build/libs/Galaxy-<version>-<engine>.jar`.
+The output JAR will be located in `build/libs/`. The specific engine included (all/js/graalpy) is controlled by the `optionalHooker` property in `build.gradle`.
 
 ### Installation
 1. Open Burp Suite.
-2. Go to `Extensions` -> `Installed`.
+2. Navigate to `Extensions` -> `Installed`.
 3. Click `Add`, select `Java` as the extension type, and pick the generated JAR file.
 
 ### Prerequisites
@@ -39,25 +44,27 @@ The output will be located in `build/libs/Galaxy-<version>-<engine>.jar`.
 
 ## Development Conventions
 
-### Code Style & Patterns
-- **Utility-First**: Extensive use of static utility classes in `org.m2sec.core.utils`. When adding encoding/decoding or crypto logic, place it there.
-- **Hook Methods**: Scripts (JS/Python) should implement standard hook functions:
-    - `hook_request_to_burp(request)`
-    - `hook_request_to_server(request)`
-    - `hook_response_to_burp(response)`
-    - `hook_response_to_client(response)`
-- **Thread Safety**: The extension handles concurrent requests; use `HttpHookThreadData` for per-request state.
+### Hook Script Implementation
+Users can write scripts in JS, Python, or Java. Each script must implement the following standard hook functions:
+- `hook_request_to_burp(request)`: Decrypt request data when it arrives from the client.
+- `hook_request_to_server(request)`: Encrypt request data before it is sent to the server.
+- `hook_response_to_burp(response)`: Decrypt response data when it arrives from the server.
+- `hook_response_to_client(response)`: Encrypt response data before it is sent back to the client.
 
-### UI Modifications
-- The editor uses `RSyntaxTextArea`. Configurations for line wrapping, auto-completion, and themes are handled in `CodeFileHookerPanel.java`.
-- **Auto-completion**: New utility methods should be registered in `CodeFileHookerPanel.createCompletionProvider()` using the `Class.method` format for better filtering.
+### Coding Style & Patterns
+- **Utility-First**: Leverage the static methods in `org.m2sec.core.utils` for any crypto or encoding needs.
+- **Model Abstraction**: Always use the models in `org.m2sec.core.models` when interacting with HTTP messages in the core logic.
+- **Thread Safety**: The extension handles concurrent requests; use `HttpHookThreadData` for per-request state if needed.
+- **Auto-completion**: When adding new utility methods, register them in `CodeFileHookerPanel.createCompletionProvider()` to provide IDE-like features in the script editor.
 
 ### Testing
 - Existing tests are located in `src/test/java`.
-- Always verify crypto logic changes against real-world test cases (e.g., matching CryptoJS or web-side implementation outputs).
+- **Note**: `TempTest.java` is often used for quick verification of crypto logic.
+- Always verify crypto changes against known-good implementations (e.g., matching a web-side CryptoJS implementation).
 
 ## Important Files
-- `build.gradle`: Project dependencies and shadowJar configuration.
-- `src/main/java/org/m2sec/core/utils/CryptoUtil.java`: Main entry point for symmetric and asymmetric encryption.
-- `src/main/java/org/m2sec/panels/httphook/CodeFileHookerPanel.java`: Implementation of the script editor and its auto-completion logic.
-- `src/main/resources/templates/`: Default templates for the various hook engines.
+- `src/main/java/org/m2sec/Galaxy.java`: The main entry point for the Burp extension.
+- `src/main/java/org/m2sec/core/httphook/IHttpHooker.java`: The base class defining the hooking orchestration logic.
+- `src/main/java/org/m2sec/core/utils/CryptoUtil.java`: The central point for all cryptographic operations.
+- `src/main/resources/templates/`: Contains default templates for new hook scripts.
+- `src/main/resources/examples/`: Provides numerous example scripts for common encryption scenarios (AES, RSA, SM2, etc.).
