@@ -24,6 +24,8 @@
 >
 > 本仓库主要包含了我个人的更新与定制化修改。如果你想获取源项目，请访问上述链接。
 >
+> 重新整理了当前工具中，可调用的函数方法，详细函数使用说明 [galaxy_wiki](https://github.com/xiao-hack/Galaxy-change/wiki)
+>
 > 详细的修改记录请查看[CHANGELOG.md](https://github.com/xiao-hack/Galaxy-change/blob/main/CHANGELOG.md)
 
 ## 🚀 安装指引
