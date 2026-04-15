@@ -10,12 +10,11 @@
 <a href="https://github.com/outlaws-bai/Galaxy/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/outlaws-bai/Galaxy"/></a>
 <br>
 <br>
-<a href="https://github.com/outlaws-bai/Galaxy/blob/main/README_EN.md">English</a> | 
-<a href="https://github.com/outlaws-bai/Galaxy/wiki">Wiki</a> | 
-<a href="https://github.com/outlaws-bai/Galaxy/releases">Download</a> | 
-<a href="https://github.com/outlaws-bai/Galaxy/wiki/FAQ">FAQ</a> | 
+<a href="https://github.com/xiao-hack/Galaxy-change/wiki">Wiki</a> | 
+<a href="https://github.com/xiao-hack/Galaxy-change/releases">Download</a> | 
 <a href="https://github.com/outlaws-bai/Galaxy/issues">Issue</a>
 </p>
+
 
 
 ## 💡 说明 / Notice
@@ -27,6 +26,14 @@
 > 重新整理了当前工具中，可调用的函数方法，详细函数使用说明 [galaxy_wiki](https://github.com/xiao-hack/Galaxy-change/wiki)
 >
 > 详细的修改记录请查看[CHANGELOG.md](https://github.com/xiao-hack/Galaxy-change/blob/main/CHANGELOG.md)
+
+
+
+---
+
+<center>下面为源项目文档</center>
+
+---
 
 ## 🚀 安装指引
 
