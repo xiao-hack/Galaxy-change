@@ -18,7 +18,7 @@ plugins {
 apply plugin: "com.github.johnrengelman.shadow"
 
 group = "org.m2sec"
-def version = "3.3.11"
+def version = "1.0.0"
 def optionalHooker = "js" // all/js/graalpy/basic(default)
 def graalVersion = "24.1.0"
 def versionFile = file("${projectDir}/src/main/resources/version.txt") as Object

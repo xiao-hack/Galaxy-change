@@ -10,7 +10,7 @@ import java.io.File;
 public class Constants {
 
     // global
-    public static final String BURP_SUITE_EXT_NAME = "Galaxy";
+    public static final String BURP_SUITE_EXT_NAME = "Galaxy-change";
     public static final String VERSION = FileTools.readResourceAsString(Constants.VERSION_STORAGE_FILE_NAME);
 
     public static final String BURP_SUITE_EXT_INIT_DEF = """
