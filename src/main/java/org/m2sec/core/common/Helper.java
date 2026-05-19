@@ -45,16 +45,8 @@ public class Helper {
         boolean buildWorkDir = false;
         String message;
         if (Files.exists(Paths.get(Constants.WORK_DIR))) {
-            if (!Files.exists(Paths.get(Constants.VERSION_STORAGE_FILE_PATH)) || !Constants.VERSION.equalsIgnoreCase(FileTools.readFileAsString(Constants.VERSION_STORAGE_FILE_PATH))) {
-                // 更新了版本
-                String randomString = FactorUtil.randomString(6);
-                String bakDir = Constants.WORK_DIR + "." + randomString + ".bak";
-                FileTools.renameDir(Constants.WORK_DIR, bakDir);
-                message = Constants.UPDATE_VERSION_DEF + bakDir + ". \r\nGood luck.";
-                buildWorkDir = true;
-            } else { // reload
-                message = "Good luck.";
-            }
+            // reload, always use existing directory regardless of version
+            message = "Good luck.";
         } else { // 第一次使用
             buildWorkDir = true;
             message = "You seem to be using this plugin for the first time. \r\nGood luck.";
