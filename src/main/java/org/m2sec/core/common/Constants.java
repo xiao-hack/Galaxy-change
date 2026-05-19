@@ -14,13 +14,14 @@ public class Constants {
     public static final String VERSION = FileTools.readResourceAsString(Constants.VERSION_STORAGE_FILE_NAME);
 
     public static final String BURP_SUITE_EXT_INIT_DEF = """
-        Welcome to Galaxy
-        Author -> outlaws-bai && tdyj && lwhispers
-        Github -> https://github.com/outlaws-bai/Galaxy
-        """;
+            Welcome to Galaxy-change
+            基于 Galaxy 和 xiasql 开发的二次开发版本
+            Author -> xiao-hack
+            Github -> https://github.com/xiao-hack/Galaxy-change
+            """;
 
     public static final String UPDATE_VERSION_DEF = "You have updated the version of Galaxy, but due to significant " +
-        "version differences, your original work dir has been moved to ";
+            "version differences, your original work dir has been moved to ";
 
     public static String JAR_FILE_PATH;
 
@@ -58,7 +59,7 @@ public class Constants {
     public static final String LOG_FILE_PATH = WORK_DIR + File.separator + "run.log";
 
     public static final String BYPASS_HOST_CHECK_TEMPLATE_FILE_PATH = TEMPLATE_DIR + File.separator +
-        "bypassHostCheckTemplate.txt";
+            "bypassHostCheckTemplate.txt";
 
     public static final String VERSION_STORAGE_FILE_NAME = "version.txt";
 
@@ -97,11 +98,12 @@ public class Constants {
     public static final String HTTP_PROTOCOL_DOMAIN_SEP = "://";
 
     public static String[] HTTP_STATIC_EXTENSIONS = (".css|.js|.jpg|.jpeg|.png|.gif|.bmp|.svg|.ico|.html|.htm|.xml|" +
-        ".txt|" +
-        ".pdf|.zip|.rar|.tar|.gz|.7z|.mp3|.mp4|.avi|.webm|.mov|.ogg|.wav|.swf|.woff|.ttf|.eot|.otf|.webp|.m4a|.m4v|" +
-        ".flv|.wmv|.doc|.docx|.xls|.xlsx|.ppt|.pptx|.csv|.rtf").split("\\|");
-    public static final String HTTP_DEFAULT_USER_AGENT =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " + "(KHTML, like Gecko) Chrome/120.0.0.0 " +
+            ".txt|" +
+            ".pdf|.zip|.rar|.tar|.gz|.7z|.mp3|.mp4|.avi|.webm|.mov|.ogg|.wav|.swf|.woff|.ttf|.eot|.otf|.webp|.m4a|.m4v|"
+            +
+            ".flv|.wmv|.doc|.docx|.xls|.xlsx|.ppt|.pptx|.csv|.rtf").split("\\|");
+    public static final String HTTP_DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            + "(KHTML, like Gecko) Chrome/120.0.0.0 " +
             "Safari/537" + ".36 Edg/120.0.0.0 M2Sec/1.0";
 
     // hook
@@ -113,7 +115,7 @@ public class Constants {
 
     public static final String HOOK_BY_GRPC_IMPL_DEF = "Please start a GRPC server and enter its address below.";
     public static final String HOOK_BY_CODE_IMPL_DEF = "Select the appropriate script and modify it until" +
-        " it meets your needs.";
+            " it meets your needs.";
 
     // file suffix
     public static final String JAVA_FILE_SUFFIX = ".java";
