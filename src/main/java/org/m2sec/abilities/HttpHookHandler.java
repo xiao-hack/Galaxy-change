@@ -44,7 +44,9 @@ public class HttpHookHandler implements HttpHandler, ProxyRequestHandler, ProxyR
     public RequestToBeSentAction handleHttpRequestToBeSent(HttpRequestToBeSent requestToBeSent) {
         Request decryptedRequest = Request.of(requestToBeSent);
         HttpHookThreadData.setRequest(decryptedRequest);
-        requestCache.put(requestToBeSent.messageId(), requestToBeSent);
+        if (requestToBeSent.hasHeader(org.m2sec.core.common.Constants.HTTP_HEADER_HOOK_HEADER_KEY)) {
+            requestCache.put(requestToBeSent.messageId(), requestToBeSent);
+        }
         return RequestToBeSentAction.continueWith(hooker.tryHookRequestToServer(requestToBeSent,
             requestToBeSent.messageId(), false), requestToBeSent.annotations());
     }
