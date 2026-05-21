@@ -155,6 +155,10 @@ public class FileTools {
     }
 
     public static void mvResources(String resourceDir, String targetDir) {
+        mvResources(resourceDir, targetDir, true);
+    }
+
+    public static void mvResources(String resourceDir, String targetDir, boolean replaceExisting) {
         try {
             String dir = targetDir + File.separator + resourceDir;
             Path targetPath = Paths.get(dir);
@@ -171,9 +175,12 @@ public class FileTools {
                 Path sourcePath = Paths.get(resource.toURI());
                 try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(sourcePath)) {
                     for (Path path : directoryStream) {
+                        Path targetFile = targetPath.resolve(path.getFileName().toString());
+                        if (!replaceExisting && Files.exists(targetFile)) {
+                            continue;
+                        }
                         try (InputStream in = Files.newInputStream(path)) {
-                            Files.copy(in, targetPath.resolve(path.getFileName().toString()),
-                                StandardCopyOption.REPLACE_EXISTING);
+                            Files.copy(in, targetFile, StandardCopyOption.REPLACE_EXISTING);
                         }
                     }
                 }
@@ -184,9 +191,13 @@ public class FileTools {
                     while (entries.hasMoreElements()) {
                         JarEntry entry = entries.nextElement();
                         if (entry.getName().startsWith(resourceDir + "/") && !entry.isDirectory()) {
+                            String fileName = entry.getName().substring(resourceDir.length() + 1);
+                            Path targetFile = targetPath.resolve(fileName);
+                            if (!replaceExisting && Files.exists(targetFile)) {
+                                continue;
+                            }
                             try (InputStream in = jarFile.getInputStream(entry)) {
-                                String fileName = entry.getName().substring(resourceDir.length() + 1);
-                                Files.copy(in, targetPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+                                Files.copy(in, targetFile, StandardCopyOption.REPLACE_EXISTING);
                             }
                         }
                     }

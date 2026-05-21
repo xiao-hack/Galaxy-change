@@ -101,10 +101,11 @@ public class GalaxySqlPanel extends JPanel {
 
         // 侧边复选框
         JPanel jps = new JPanel();
-        jps.setLayout(new GridLayout(14, 1));
-        JLabel jl_1 = new JLabel("特此说明：为解决加密参数，无法进行sql注入扫描问题，添加此功能");
+        jps.setLayout(new GridLayout(15, 1));
+        JLabel jl_1 = new JLabel("特此说明：为解决加密参数，无法进行sql注入扫描问题，添加此功能，");
         JLabel jl_2 = new JLabel("功能在XiaSql的基础上进行改动");
         JLabel jl_3 = new JLabel("使用说明：该功能会自动捕获解密后的请求进行扫描，无需其他操作");
+        JLabel jl_4 = new JLabel("未加密情况，可启动noEncrypted脚本，进行扫描");
         JCheckBox chkbox1 = new JCheckBox("启动插件", true);
         JCheckBox chkbox2 = new JCheckBox("值是数字则进行-1、-0", false);
         JCheckBox chkbox3 = new JCheckBox("自定义payload");
@@ -203,6 +204,7 @@ public class GalaxySqlPanel extends JPanel {
         jps.add(jl_1);
         jps.add(jl_2);
         jps.add(jl_3);
+        jps.add(jl_4);
         jps.add(chkbox1);
         jps.add(chkbox2);
         jps.add(chkbox6);

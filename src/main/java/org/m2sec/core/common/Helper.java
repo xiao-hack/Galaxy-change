@@ -45,8 +45,47 @@ public class Helper {
         boolean buildWorkDir = false;
         String message;
         if (Files.exists(Paths.get(Constants.WORK_DIR))) {
-            // reload, always use existing directory regardless of version
-            message = "Good luck.";
+            // Check if the version has changed
+            String localVersion = "";
+            if (Files.exists(Paths.get(Constants.VERSION_STORAGE_FILE_PATH))) {
+                try {
+                    localVersion = FileTools.readFileAsString(Constants.VERSION_STORAGE_FILE_PATH).trim();
+                } catch (Exception ignore) {}
+            }
+            String currentVersion = Constants.VERSION.trim();
+            if (!currentVersion.equals(localVersion)) {
+                // Version updated! Update only examples, templates and version.txt
+                try {
+                    FileTools.mvResource(Constants.VERSION_STORAGE_FILE_NAME, Constants.WORK_DIR);
+                    // Examples are updated non-destructively: only copy if the file does not already exist
+                    FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/" + HttpHookService.JAVA.getDir(),
+                        Constants.WORK_DIR, false);
+                    FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/" + HttpHookService.JS.getDir(),
+                        Constants.WORK_DIR, false);
+                    FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/" + HttpHookService.GRAALPY.getDir(),
+                        Constants.WORK_DIR, false);
+                    FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/" + HttpHookService.JYTHON.getDir(),
+                        Constants.WORK_DIR, false);
+                    FileTools.mvResources(Constants.TEMPLATE_DIR_NAME, Constants.WORK_DIR);
+                    message = "Galaxy-change updated from " + localVersion + " to " + currentVersion + ". Examples and templates have been updated.";
+                } catch (Exception e) {
+                    message = "Galaxy-change updated to " + currentVersion + ", but failed to update resources: " + e.getMessage();
+                }
+            } else {
+                message = "Good luck.";
+            }
+
+            // Always make sure config files exist
+            if (!Files.exists(Paths.get(Constants.SETTING_FILE_PATH))) {
+                try {
+                    FileTools.mvResource(Constants.SETTING_FILE_NAME, Constants.WORK_DIR);
+                } catch (Exception ignore) {}
+            }
+            if (!Files.exists(Paths.get(Constants.OPTION_FILE_PATH))) {
+                try {
+                    FileTools.mvResource(Constants.OPTION_FILE_NAME, Constants.WORK_DIR);
+                } catch (Exception ignore) {}
+            }
         } else { // 第一次使用
             buildWorkDir = true;
             message = "You seem to be using this plugin for the first time. \r\nGood luck.";
@@ -86,15 +125,15 @@ public class Helper {
         FileTools.mvResource(Constants.VERSION_STORAGE_FILE_NAME, Constants.WORK_DIR);
         FileTools.mvResource(Constants.SETTING_FILE_NAME, Constants.WORK_DIR);
         FileTools.mvResource(Constants.OPTION_FILE_NAME, Constants.WORK_DIR);
-        // mv resources
+        // mv resources (use replaceExisting = false for examples as well to be consistent)
         FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/"+ HttpHookService.JAVA.getDir(),
-            Constants.WORK_DIR);
+            Constants.WORK_DIR, false);
         FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/"+ HttpHookService.JS.getDir(),
-            Constants.WORK_DIR);
+            Constants.WORK_DIR, false);
         FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/"+ HttpHookService.GRAALPY.getDir(),
-            Constants.WORK_DIR);
+            Constants.WORK_DIR, false);
         FileTools.mvResources(Constants.HTTP_HOOK_EXAMPLES_DIR_NAME + "/"+ HttpHookService.JYTHON.getDir(),
-            Constants.WORK_DIR);
+            Constants.WORK_DIR, false);
         FileTools.mvResources(Constants.TEMPLATE_DIR_NAME, Constants.WORK_DIR);
     }
 
