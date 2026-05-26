@@ -45,9 +45,7 @@ public class GalaxySqlPanel extends JPanel {
     private int conut = 0; // 记录条数
     private String data_md5_id; // 用于判断目前选中的数据包
     public AbstractTableModel model = new MyModel();
-    private int original_data_len; // 记录原始数据包的长度
-    private int is_int = 1; // 开关 0关 1开;纯数据是否进行-1,-0
-    private String temp_data; // 用于保存临时内容
+    private int is_int = 0; // 开关 0关 1开;纯数据是否进行-1,-0
     private int JTextArea_int = 0; // 自定义payload开关 0关 1开
     private String JTextArea_data_1 = ""; // 文本域的内容
     private int diy_payload_1 = 1; // 自定义payload空格编码开关 0关 1开
@@ -166,11 +164,15 @@ public class GalaxySqlPanel extends JPanel {
         chkbox6.addItemListener(e -> is_cookie = chkbox6.isSelected());
 
         btn1.addActionListener(e -> {
-            log.clear();
-            log2.clear();
-            log3.clear();
-            log4_md5.clear();
-            conut = 0;
+            synchronized (log) {
+                log.clear();
+                log4_md5.clear();
+                conut = 0;
+            }
+            synchronized (log2) {
+                log2.clear();
+                log3.clear();
+            }
             ((LogModel) logTable.getModel()).fireTableDataChanged();
             model.fireTableDataChanged();
         });
@@ -254,12 +256,12 @@ public class GalaxySqlPanel extends JPanel {
 
         String urlPath = request.url();
         String[] urlSplit = urlPath.split("\\?");
-        temp_data = urlSplit[0];
+        String tempData = urlSplit[0];
 
         if (white_switchs == 1) {
             boolean whiteMatched = false;
             for (String w : white_URL.split(",")) {
-                if (temp_data.contains(w)) {
+                if (tempData.contains(w)) {
                     whiteMatched = true;
                     break;
                 }
@@ -270,7 +272,7 @@ public class GalaxySqlPanel extends JPanel {
 
         String[] staticFiles = { "jpg", "png", "gif", "css", "js", "pdf", "mp3", "mp4", "avi" };
         for (String sf : staticFiles) {
-            if (temp_data.toLowerCase().endsWith("." + sf))
+            if (tempData.toLowerCase().endsWith("." + sf))
                 return;
         }
 
@@ -280,35 +282,43 @@ public class GalaxySqlPanel extends JPanel {
                     || (is_cookie && para.type() == HttpParameterType.COOKIE)) {
                 if (is_add == 0)
                     is_add = 1;
-                temp_data += "+" + para.name();
+                tempData += "+" + para.name();
             }
         }
 
-        temp_data += "+" + request.method();
-        temp_data = MD5(temp_data);
+        tempData += "+" + request.method();
+        tempData = MD5(tempData);
 
-        for (Request_md5 i : log4_md5) {
-            if (i.md5_data.equals(temp_data)) {
-                if (toolFlag == ToolType.EXTENSIONS || toolFlag.name().equals("EXTENSIONS")
-                        || toolFlag.name().equals("EXTENSION")) {
-                    temp_data = MD5(String.valueOf(System.currentTimeMillis()));
-                } else {
-                    return;
-                }
-            }
-        }
-
+        int currentId;
+        int originalDataLen;
         if (is_add != 0) {
-            log4_md5.add(new Request_md5(temp_data));
-            int row = log.size();
-            original_data_len = response == null ? 0 : response.toByteArray().length();
-            if (original_data_len <= 0)
+            originalDataLen = response == null ? 0 : response.toByteArray().length();
+            if (originalDataLen <= 0)
                 return;
 
-            HttpRequestResponse reqRes = HttpRequestResponse.httpRequestResponse(request, response);
-            log.add(new LogEntry(conut++, toolFlag, reqRes, request.url(), "", "", "", temp_data, 0, "run……",
-                    response.statusCode()));
-            ((LogModel) logTable.getModel()).fireTableRowsInserted(row, row);
+            synchronized (log) {
+                for (Request_md5 i : log4_md5) {
+                    if (i.md5_data.equals(tempData)) {
+                        if (toolFlag == ToolType.EXTENSIONS || toolFlag.name().equals("EXTENSIONS")
+                                || toolFlag.name().equals("EXTENSION")) {
+                            tempData = MD5(String.valueOf(System.currentTimeMillis()));
+                        } else {
+                            return;
+                        }
+                    }
+                }
+                log4_md5.add(new Request_md5(tempData));
+                currentId = conut++;
+                int row = log.size();
+                HttpRequestResponse reqRes = HttpRequestResponse.httpRequestResponse(request, response);
+                log.add(new LogEntry(currentId, toolFlag, reqRes, request.url(), "", "", "", tempData, 0, "run……",
+                        response.statusCode()));
+                
+                final int targetRow = row;
+                SwingUtilities.invokeLater(() -> ((LogModel) logTable.getModel()).fireTableRowsInserted(targetRow, targetRow));
+            }
+        } else {
+            return;
         }
 
         for (ParsedHttpParameter para : request.parameters()) {
@@ -386,7 +396,7 @@ public class GalaxySqlPanel extends JPanel {
                 } else {
                     if (payload.equals("''") || payload.equals("-0")) {
                         if (change != currentLen) {
-                            if (currentLen == original_data_len) {
+                            if (currentLen == originalDataLen) {
                                 change_sign = "✔ ==> ?";
                                 change_sign_1 = " ✔";
                             } else {
@@ -405,27 +415,40 @@ public class GalaxySqlPanel extends JPanel {
                 }
 
                 int sc = testResponse == null ? 0 : testResponse.statusCode();
-                log2.add(new LogEntry(conut, toolFlag, resReq, newReq.url(), key, testValue + payload, change_sign,
-                        temp_data, time_2 - time_1, "end", sc));
+                synchronized (log2) {
+                    LogEntry newEntry = new LogEntry(currentId, toolFlag, resReq, newReq.url(), key, testValue + payload, change_sign,
+                            tempData, time_2 - time_1, "end", sc);
+                    log2.add(newEntry);
+                    if (tempData.equals(data_md5_id)) {
+                        log3.add(newEntry);
+                        SwingUtilities.invokeLater(() -> model.fireTableDataChanged());
+                    }
+                }
             }
         }
 
-        for (LogEntry value : log) {
-            if (temp_data.equals(value.data_md5)) {
-                value.state = "end!" + change_sign_1;
+        synchronized (log) {
+            for (LogEntry value : log) {
+                if (tempData.equals(value.data_md5)) {
+                    value.state = "end!" + change_sign_1;
+                }
             }
         }
 
-        ((LogModel) logTable.getModel()).fireTableDataChanged();
-        if (select_row < logTable.getRowCount() && select_row >= 0) {
-            logTable.setRowSelectionInterval(select_row, select_row);
-        }
+        SwingUtilities.invokeLater(() -> {
+            ((LogModel) logTable.getModel()).fireTableDataChanged();
+            if (select_row < logTable.getRowCount() && select_row >= 0) {
+                logTable.setRowSelectionInterval(select_row, select_row);
+            }
+        });
     }
 
     private class LogModel extends AbstractTableModel {
         @Override
         public int getRowCount() {
-            return log.size();
+            synchronized (log) {
+                return log.size();
+            }
         }
 
         @Override
@@ -453,7 +476,11 @@ public class GalaxySqlPanel extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            LogEntry logEntry = log.get(rowIndex);
+            LogEntry logEntry;
+            synchronized (log) {
+                if (rowIndex >= log.size()) return "";
+                logEntry = log.get(rowIndex);
+            }
             switch (columnIndex) {
                 case 0:
                     return logEntry.id;
@@ -476,7 +503,9 @@ public class GalaxySqlPanel extends JPanel {
     private class MyModel extends AbstractTableModel {
         @Override
         public int getRowCount() {
-            return log3.size();
+            synchronized (log2) {
+                return log3.size();
+            }
         }
 
         @Override
@@ -506,7 +535,11 @@ public class GalaxySqlPanel extends JPanel {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            LogEntry logEntry2 = log3.get(rowIndex);
+            LogEntry logEntry2;
+            synchronized (log2) {
+                if (rowIndex >= log3.size()) return "";
+                logEntry2 = log3.get(rowIndex);
+            }
             switch (columnIndex) {
                 case 0:
                     return logEntry2.parameter;
@@ -535,14 +568,19 @@ public class GalaxySqlPanel extends JPanel {
 
         @Override
         public void changeSelection(int row, int col, boolean toggle, boolean extend) {
-            LogEntry logEntry = log.get(row);
+            LogEntry logEntry;
+            synchronized (log) {
+                logEntry = log.get(row);
+            }
             data_md5_id = logEntry.data_md5;
             select_row = logEntry.id;
 
-            log3.clear();
-            for (LogEntry entry : log2) {
-                if (entry.data_md5.equals(data_md5_id))
-                    log3.add(entry);
+            synchronized (log2) {
+                log3.clear();
+                for (LogEntry entry : log2) {
+                    if (entry.data_md5.equals(data_md5_id))
+                        log3.add(entry);
+                }
             }
             model.fireTableDataChanged();
 
@@ -561,7 +599,11 @@ public class GalaxySqlPanel extends JPanel {
 
         @Override
         public void changeSelection(int row, int col, boolean toggle, boolean extend) {
-            LogEntry logEntry = log3.get(row);
+            LogEntry logEntry;
+            synchronized (log2) {
+                if (row >= log3.size()) return;
+                logEntry = log3.get(row);
+            }
             requestViewer.setRequest(logEntry.requestResponse.request());
             if (logEntry.requestResponse.response() != null) {
                 responseViewer.setResponse(logEntry.requestResponse.response());
